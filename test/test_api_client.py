@@ -97,8 +97,8 @@ class TestClient(unittest.TestCase):
 
     @mock.patch('__builtin__.open')
     def test_save_to_file(self, mock_file):
-        self.assertRaises(OSError, self.client.save_to_file("","/tmp"))
-        self.assertRaises(IOError, self.client.save_to_file("","/dev/null"))
+        self.client.save_to_file("data","test.json")
+        mock_file.assert_called_with(self.client.out_dir+"/test.json", "a")
 
 def suite():
     suite = unittest.TestSuite()
