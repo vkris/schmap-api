@@ -53,13 +53,31 @@ class TestClient(unittest.TestCase):
 
     @mock.patch.object(SchmapAPIClient, 'analyze')
     def test_analyze_account(self, mock_analyze):
-        self.client.analyze_account(["user1","user2","user3"])
+        mock_analyze.retrun_value = 0
+        ret = self.client.analyze_account(["user1","user2","user3"])
         self.assertEqual(3,mock_analyze.call_count)
+        self.assertEqual(0,ret)
 
     @mock.patch.object(SchmapAPIClient, 'analyze')
     def test_analyze_list(self, mock_analyze):
-        self.client.analyze_list(["user1","user2","user3"],"some_name")
+        mock_analyze.retrun_value = 0
+        ret = self.client.analyze_list(["user1","user2","user3"],"some_name")
         self.assertEqual(1,mock_analyze.call_count)
+        self.assertEqual(0,ret)
+
+    @mock.patch.object(SchmapAPIClient, 'save_to_file')
+    @mock.patch.object(SchmapAPIClient, 'request_uri')
+    @mock.patch.object(SchmapAPIClient, 'get_response')
+    def test_analyze(self, mock_get_response, mock_request_uri, mock_save_to_file):
+        # Test 1
+        mock_request_uri.return_value = '{}'
+        mock_get_response.retrun_value = {"request_id":100}
+        self.client.analyze("http://sample.com",{"list_name":"GSList", "analysis":"profiled_dataset"})
+        self.assertEqual(1, mock_get_response.call_count)
+        self.assertTrue(mock_request_uri.called)
+        self.assertTrue(mock_save_to_file.called)
+        self.assertTrue(self.client.request_queue.get().endswith("##GSList"))
+
 
     @mock.patch.object(SchmapAPIClient, 'request_uri')
     @mock.patch.object(schmap_api, 'getLog')
@@ -70,7 +88,17 @@ class TestClient(unittest.TestCase):
         self.assertEqual(self.client.check_status(100) ,0)
         self.assertRaises(SchmapAPIException, self.client.check_status,-1)
 
+    @mock.patch('threading.Thread')
+    def test_get_data(self, mock_thread):
+        # Make sure you are running only a fixed size of thread pool
+        ret = self.client.get_data()
+        self.assertEqual(self.client.no_of_threads, mock_thread.call_count)
+        self.assertEqual(0,ret)
 
+    @mock.patch('__builtin__.open')
+    def test_save_to_file(self, mock_file):
+        self.assertRaises(OSError, self.client.save_to_file("","/tmp"))
+        self.assertRaises(IOError, self.client.save_to_file("","/dev/null"))
 
 def suite():
     suite = unittest.TestSuite()

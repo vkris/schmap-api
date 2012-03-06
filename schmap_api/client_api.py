@@ -79,6 +79,7 @@ class SchmapAPIClient:
         for user in user_list:
             post = {"screen_name":user, "analysis_type":"profiled_dataset"}
             self.analyze(uri, post)
+        return 0
 
     def analyze_list(self, user_list, list_name):
         """
@@ -87,7 +88,7 @@ class SchmapAPIClient:
         post = {"list_members":"|".join(user_list), "list_name":list_name, "analysis_type":"profiled_dataset"}
         uri = self.base_uri + "analyze_list"
         self.analyze(uri, post)
-        
+        return 0
 
     def analyze(self, uri, post):
         """ 
