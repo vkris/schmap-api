@@ -3,7 +3,10 @@ import sys,os,re
 import urllib
 import mock
 from mock_urllib import MockURLlib
-import json
+try:
+    import json
+except ImportError, e:
+    import simplejson as json
 
 sys.path.append("..")
 from schmap_api.exception import SchmapAPIException
