@@ -16,7 +16,9 @@ import schmap_api
 
 class TestClient(unittest.TestCase):
     def setUp(self):
-        self.client = SchmapAPIClient("test","pass")
+        logger = schmap_api.getLog()
+        logger.setLevel("CRITICAL")
+        self.client = SchmapAPIClient("test","pass",logger)
         self.client.set_frequency(5)
 
     def test_frequency(self):
@@ -60,9 +62,11 @@ class TestClient(unittest.TestCase):
         self.assertEqual(1,mock_analyze.call_count)
 
     @mock.patch.object(SchmapAPIClient, 'request_uri')
-    def test_check_status(self, mock_request):
+    @mock.patch.object(schmap_api, 'getLog')
+    def test_check_status(self, mock_log, mock_request):
         # If you make percent_value other than 100, it will get into an infinite loop
         mock_request.return_value = '{"code" : 0,"message" : "processed_succesfully", "percent_complete":100.00}'
+        mock_log.return_value =""
         self.assertEqual(self.client.check_status(100) ,0)
         self.assertRaises(SchmapAPIException, self.client.check_status,-1)
 
