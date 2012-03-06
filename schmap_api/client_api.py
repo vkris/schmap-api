@@ -29,6 +29,7 @@ class SchmapAPIClient:
     request_ids_file = "queue.out"
 
     def __init__(self, username, password, base_uri="", logger=""):
+        """ Initialises with user name and password """        
         self.api_username = username
         self.api_password = password
         if (logger != ""):
@@ -37,21 +38,21 @@ class SchmapAPIClient:
         log.debug("Setting username and password")
 
     def set_crendentials(self, username, password):
+        """ Sets the credentials """
         self.api_username = username
         self.api_password = password
         log.debug("Setting credentitals")
 
     def set_frequency(self, frequency):
+        """ Sets the frequency """
         self.frequency = frequency
 
-
     def set_base_uri(self,uri):
+        """ alternatively set the base uri"""
         self.base_uri = uri
 
-    def set_output_file(self, filename):
-        self.out_file = filename
-
     def request_uri(self,uri,data={}):
+        """ Wrapper to request any URI for both GET and POST """
         data = urllib.urlencode(data)
         if len(data) > 0:
             # Makes a POST request
@@ -69,18 +70,31 @@ class SchmapAPIClient:
                 raise SchmapAPIException(401)
     
     def analyze_account(self, user_list):
+        """ 
+        Analyze account schmap API call 
+        This just sends a request.  Use get_data to retrieve the data
+        from this call
+        """
         uri = self.base_uri + "analyze_account"
         for user in user_list:
             post = {"screen_name":user, "analysis_type":"profiled_dataset"}
             self.analyze(uri, post)
 
     def analyze_list(self, user_list, list_name):
+        """
+        Analyzes the list. Again this is just the request.
+        """
         post = {"list_members":"|".join(user_list), "list_name":list_name, "analysis_type":"profiled_dataset"}
         uri = self.base_uri + "analyze_list"
         self.analyze(uri, post)
         
 
     def analyze(self, uri, post):
+        """ 
+        Actual code to submit the request 
+        This also saves the returned request id to a file and a queue
+        Using queue to support threading.
+        """
         response = self.request_uri(uri, post)
         log.info("Response :"+ response)
         try:
@@ -99,6 +113,11 @@ class SchmapAPIClient:
 
     
     def check_status(self, request_id):
+        """
+        Checks the status of a posted request recursively sleeping for n seconds.
+        After a pre-determined time, it throws an exception. You can then catch up with
+        the rest of data using catch_up method.
+        """
         self.counter = self.counter + 1
         if request_id < 0: 
             raise SchmapAPIException(7004)
@@ -116,6 +135,9 @@ class SchmapAPIClient:
             return 0
 
     def get_data(self):
+        """ 
+        Submits threads to request data using thread-pool logic
+        """
         threads = []
         for i in range(self.no_of_threads):
             t = threading.Thread(target=self.get_data_thread)
@@ -124,15 +146,8 @@ class SchmapAPIClient:
         for t in threads: t.join()
         return 0
 
-    def get_data_thread(self, filename):
-        for line in open(filename):
-            request_id, list_name = line.strip().split('##')
-            self.check_status(request_id)
-            uri = self.base_uri + "get_dataset?request_id=" + str(request_id)
-            response = self.request_uri(uri)
-            self.save_to_file(response,request_id+"_"+list_name)
-
     def get_data_thread(self,filename=""):
+        """ The actual thread part, deals with both files and queues """
         def fetch():
             self.check_status(request_id)
             uri = self.base_uri + "get_dataset?request_id=" + str(request_id)
@@ -151,6 +166,7 @@ class SchmapAPIClient:
                 fetch()
 
     def save_to_file(self, response,filename):
+        """ Save data to file with a file name """
         try:
             os.mkdir(self.out_dir)
         except OSError, e:
@@ -164,6 +180,7 @@ class SchmapAPIClient:
 
 
     def get_response(self, response):
+        """ Handles the response """
         if (response == ""):
             log.info("Empty Response")
             raise SchmapAPIException(7000)
@@ -184,6 +201,11 @@ class SchmapAPIClient:
                 raise SchmapAPIException(7000)
 
     def catch_up(self, filename=""):
+        """
+        If the queue takes a long time and times out, you need not worry.
+        The request ids are in a file and this call will help you 
+        retrieve the content
+        """
         if (filename == ""):
             filename  = self.out_dir+"/"+self.request_ids_file
         self.get_data_thread(filename)
