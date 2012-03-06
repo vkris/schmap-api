@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 import os, re
@@ -33,7 +31,7 @@ setup(name=PKG,
       author="Vivek Krishna",
       author_email="v@generalsentiment.com",
       url="http://github.com/vkris/schmap-api/",
-      packages = ['schmap-api'],
+      packages = ['schmap_api'],
       #install_requires = ['zc-zookeeper-static'],
       license = "GS License",
       keywords="schmap",
