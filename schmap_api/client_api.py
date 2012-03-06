@@ -28,9 +28,12 @@ class SchmapAPIClient:
     sleep_time = 3 # seconds
     request_ids_file = "queue.out"
 
-    def __init__(self, username, password, base_uri=""):
+    def __init__(self, username, password, base_uri="", logger=""):
         self.api_username = username
         self.api_password = password
+        if (logger != ""):
+            global log
+            log = logger
         log.debug("Setting username and password")
 
     def set_crendentials(self, username, password):
