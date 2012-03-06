@@ -32,10 +32,10 @@ setup(name=PKG,
       author_email="v@generalsentiment.com",
       url="http://github.com/vkris/schmap-api/",
       packages = ['schmap_api'],
-      #install_requires = ['zc-zookeeper-static'],
+      #install_requires = ['coverage','mock'],
       license = "GS License",
       keywords="schmap",
       zip_safe = True,
-      test_suite="tests",
+      test_suite="test",
       tests_require=['coverage', 'mock'])
 
