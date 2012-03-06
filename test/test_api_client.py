@@ -7,7 +7,7 @@ import json
 
 sys.path.append("..")
 from schmap_api.exception import SchmapAPIException
-from schmap_api.client import SchmapAPIClient
+from schmap_api.client_api import SchmapAPIClient
 import schmap_api
 
 
@@ -15,7 +15,6 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         self.client = SchmapAPIClient("test","pass")
         self.client.set_frequency(5)
-        #self.file_reader_for_uri= open("/tmp/junk.out")
 
     def test_frequency(self):
         self.assertEqual(self.client.frequency,5)
