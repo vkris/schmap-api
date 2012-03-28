@@ -27,14 +27,21 @@ class SchmapAPIClient:
     max_wait_time = 60 # seconds
     sleep_time = 3 # seconds
     request_ids_file = "queue.out"
+    return_call = {} 
+    return_call['full_analysis'] = "get_analysis"
+    return_call['profiled_dataset'] = "get_dataset"
+    # Default analysis type, this is cheaper
+    analysis_type = "full_analysis"
 
-    def __init__(self, username, password, base_uri="", logger=""):
+    def __init__(self, username, password, base_uri="", logger="", output_dir=""):
         """ Initialises with user name and password """        
         self.api_username = username
         self.api_password = password
         if (logger != ""):
             global log
             log = logger
+        if ( output_dir != ""):
+            self.out_dir = output_dir
         log.debug("Setting username and password")
 
     def set_crendentials(self, username, password):
@@ -81,11 +88,19 @@ class SchmapAPIClient:
             self.analyze(uri, post)
         return 0
 
-    def analyze_list(self, user_list, list_name):
+    def analyze_list(self, user_list, list_name, analysis_type):
         """
         Analyzes the list. Again this is just the request.
+        user_list - list of users
+        list_name - Name based on clients
+        analysis_type - profiled_dataset/full_analysis
         """
-        post = {"list_members":"|".join(user_list), "list_name":list_name, "analysis_type":"profiled_dataset"}
+
+        self.analysis_type = analysis_type # setting this becaue we need this to fetch data
+        if ( len(user_list) == 1):
+            post = {"list_members":user_list[0]+"|", "list_name":list_name, "analysis_type":analysis_type}
+        else:
+            post = {"list_members":"|".join(user_list), "list_name":list_name, "analysis_type":analysis_type}
         uri = self.base_uri + "analyze_list"
         self.analyze(uri, post)
         return 0
@@ -150,8 +165,9 @@ class SchmapAPIClient:
     def get_data_thread(self,filename=""):
         """ The actual thread part, deals with both files and queues """
         def fetch():
-            self.check_status(request_id)
-            uri = self.base_uri + "get_dataset?request_id=" + str(request_id)
+            self.check_status(request_id)            
+            #uri = self.base_uri + "get_dataset?request_id=" + str(request_id)
+            uri = self.base_uri + self.return_call[self.analysis_type]+"?request_id=" + str(request_id)
             response = self.request_uri(uri)
             self.save_to_file(response,request_id+"_"+list_name+".json")
 

@@ -16,9 +16,9 @@ def getLog():
     logger.addHandler(lhandler)
     return logger
 
-def client(username, password):
+def client(username, password,output_dir=""):
     from schmap_api.client_api import SchmapAPIClient
-    return SchmapAPIClient(username, password)
+    return SchmapAPIClient(username, password,"","",output_dir)
 
 log = getLog()
 

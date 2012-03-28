@@ -61,7 +61,8 @@ class TestClient(unittest.TestCase):
     @mock.patch.object(SchmapAPIClient, 'analyze')
     def test_analyze_list(self, mock_analyze):
         mock_analyze.retrun_value = 0
-        ret = self.client.analyze_list(["user1","user2","user3"],"some_name")
+        analysis_type = "full_analysis"
+        ret = self.client.analyze_list(["user1","user2","user3"],"some_name", analysis_type)
         self.assertEqual(1,mock_analyze.call_count)
         self.assertEqual(0,ret)
 
