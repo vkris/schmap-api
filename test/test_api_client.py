@@ -18,7 +18,7 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         logger = schmap_api.getLog()
         logger.setLevel("CRITICAL")
-        self.client = SchmapAPIClient("test","pass",logger)
+        self.client = SchmapAPIClient("test","pass","clientid",logger)
         self.client.set_frequency(5)
 
     def test_frequency(self):

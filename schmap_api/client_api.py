@@ -17,6 +17,7 @@ from schmap_api import log
 class SchmapAPIClient:
     api_username = ""
     api_password = ""
+    client_id= ""
     frequency = 5
     api_version=1
     base_uri="https://www.schmap.it/api/social_analysis/"
@@ -33,10 +34,11 @@ class SchmapAPIClient:
     # Default analysis type, this is cheaper
     analysis_type = "full_analysis"
 
-    def __init__(self, username, password, base_uri="", logger="", output_dir=""):
+    def __init__(self, username, password, client_id, base_uri="", logger="", output_dir=""):
         """ Initialises with user name and password """        
         self.api_username = username
         self.api_password = password
+        self.client_id = client_id
         if (logger != ""):
             global log
             log = logger
@@ -84,7 +86,7 @@ class SchmapAPIClient:
         """
         uri = self.base_uri + "analyze_account"
         for user in user_list:
-            post = {"screen_name":user, "analysis_type":"profiled_dataset"}
+            post = {"screen_name":user, "analysis_type":"profiled_dataset", "client_id": self.client_id}
             self.analyze(uri, post)
         return 0
 
@@ -98,9 +100,9 @@ class SchmapAPIClient:
 
         self.analysis_type = analysis_type # setting this becaue we need this to fetch data
         if ( len(user_list) == 1):
-            post = {"list_members":user_list[0]+"|", "list_name":list_name, "analysis_type":analysis_type}
+            post = {"list_members":user_list[0]+"|", "list_name":list_name, "analysis_type":analysis_type,"client_id":self.client_id}
         else:
-            post = {"list_members":"|".join(user_list), "list_name":list_name, "analysis_type":analysis_type}
+            post = {"list_members":"|".join(user_list), "list_name":list_name, "analysis_type":analysis_type,"client_id":self.client_id}
         uri = self.base_uri + "analyze_list"
         self.analyze(uri, post)
         return 0
